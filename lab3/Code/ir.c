@@ -1,11 +1,13 @@
 #include "ir.h"
 
+struct IRList *first;
+
 static char *newVar(int type)
 {
 	char prefix;
 	static int varCount = 1, tempCount = 1, labelCount = 1;
 	int no;
-	switch(type)
+	switch((int)type)
 	{
 		case TYPE_VAR: prefix = 'v'; no = varCount++; break;
 		case TYPE_TEMP: prefix = 't'; no = tempCount++; break;
@@ -111,7 +113,7 @@ static struct IR* condJumpIR(struct Operand *op1, struct Operand *op2,
 /*Create a empty Intermediate code linked list. Initially, It contains an unused 
   head node. Next and prev fields all point to itsellf
 */
-struct IRList *createIRNode()
+static struct IRList *createIRNode()
 {
 	struct IRList *irList = (struct IRList *)malloc(sizeof(struct IRList));
 	irList->ir =  NULL;
@@ -220,6 +222,9 @@ static int calculate_width(struct Type *t)
 	return t->width;
 }
 
+/*###############################################################################*/
+
+static void translate_ExtDefList(struct Node *);
 void translate(struct Node *root, FILE *out)
 {
 	first = createIRNode();
@@ -262,6 +267,8 @@ static int isInCurrentParams(char *text)
 	return 0;
 }
 
+
+static void translate_CompSt(struct Node *);
 static void translate_ExtDefList(struct Node *root)
 {
 	struct Node *ExtDef = NULL;
@@ -293,6 +300,8 @@ static void translate_ExtDefList(struct Node *root)
 	}	
 }
 
+static void translate_Stmt(struct Node *);
+static void translate_DefList(struct Node *);
 static void translate_CompSt(struct Node *root)
 {
 	translate_DefList(root->children[1]);
@@ -305,6 +314,7 @@ static void translate_CompSt(struct Node *root)
 	}
 }
 
+static void translate_Cond(struct Node *, struct Operand *, struct Operand *);
 static void translate_IF(struct Node *root)
 {
 	struct Operand *label1 = varOperand(VARIABLE, NORMAL, newVar(TYPE_LABEL)),
@@ -340,6 +350,7 @@ static void translate_WHILE(struct Node *root)
 	insertIR(first, singleOpIR(LABEL_IR, label3));
 }
 
+static void translate_Exp(struct Node *, struct Operand *);
 static void translate_Stmt(struct Node *root)
 {
 	if(strcmp(root->children[0]->data->name, "CompSt") == 0)
