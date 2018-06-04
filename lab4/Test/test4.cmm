@@ -1,0 +1,16 @@
+int main()
+{
+	int i = 1;
+	int j = i + i;
+	int op[5];
+	int index[3];
+	index[j] = 4;
+	op[4] = 10;
+	op[index[j]] = -op[index[j]];
+	op[index[j]] = op[index[j]] + index[j];
+	i = op[index[j]];
+	i = (i - 10) * 2;
+	i = -i; 
+	write(i);
+	return 1;
+}
